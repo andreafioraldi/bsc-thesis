@@ -1,0 +1,9 @@
+[submodule "angrdbg"]
+	path = angrdbg
+	url = git@github.com:andreafioraldi/angrdbg.git
+[submodule "angrgdb"]
+	path = angrgdb
+	url = git@github.com:andreafioraldi/angrgdb.git
+[submodule "IDAngr"]
+	path = IDAngr
+	url = git@github.com:andreafioraldi/IDAngr.git
