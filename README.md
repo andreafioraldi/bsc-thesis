@@ -11,4 +11,16 @@ This is my Bsc thesis.
 
 ResearchGate page: [https://www.researchgate.net/publication/327655380_Symbolic_Execution_and_Debugging_Synchronization](https://www.researchgate.net/publication/327655380_Symbolic_Execution_and_Debugging_Synchronization)
 
+### Cite
 
+You can use the following bibtex entry:
+
+``` 
+@MastersThesis{Fioraldi:BscThesis:2018,
+    author = {Andrea Fioraldi},
+    title = {{Symbolic Execution and Debugging Synchronization}},
+    school = {Sapienza University of Rome},
+    month = {October},
+    year = {2018},
+}
+```
