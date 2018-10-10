@@ -11,6 +11,10 @@ This is my Bsc thesis.
 
 ResearchGate page: [https://www.researchgate.net/publication/327655380_Symbolic_Execution_and_Debugging_Synchronization](https://www.researchgate.net/publication/327655380_Symbolic_Execution_and_Debugging_Synchronization)
 
+Advisor: [Prof. Camil Demetrescu](https://github.com/camild)
+
+Co-Advisors: [Dr. Emilio Coppa](https://github.com/ercoppa), [Dr. Daniele Cono D’Elia](https://github.com/dcdelia)
+
 ### Cite
 
 You can use the following bibtex entry (it's a workaround to cite a bsc thesis):
@@ -25,3 +29,4 @@ You can use the following bibtex entry (it's a workaround to cite a bsc thesis):
     type = {{Bachelor's thesis}},
 }
 ```
+
