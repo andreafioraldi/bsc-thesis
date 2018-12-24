@@ -1,0 +1,52 @@
+\begin{cpp_code}
+signed __int64 sub_13F0()
+{
+  char *v0; // rbx
+  __int64 v1; // rdx
+  signed __int64 result; // rax
+  int v3; // eax
+  int v4; // edx
+  char v5; // [rsp+0h] [rbp-28h]
+  char v6; // [rsp+1h] [rbp-27h]
+  char v7; // [rsp+2h] [rbp-26h]
+  char v8; // [rsp+3h] [rbp-25h]
+  unsigned __int64 v9; // [rsp+18h] [rbp-10h]
+
+  v9 = __readfsqword(0x28u);
+  v0 = &v5;
+  __printf_chk(1LL, "The authenticity of host '%s (3.13.3.7)' can't be established.\n", off_208B80);
+  puts("ECDSA key fingerprint is SHA256:+d+dnKGLreinYcA8EogcgjSF3yhvEBL+6twxEc04ZPq.");
+  __printf_chk(1LL, "Are you sure you want to continue connecting (yes/no)? ", v1);
+  if ( !(unsigned int)__isoc99_scanf("%3s", &v5) )
+    return 0LL;
+  if ( v5 != 'y' )
+    return 0LL;
+  if ( v6 != 'e' )
+    return 0LL;
+  if ( v7 != 's' )
+    return 0LL;
+  if ( v8 )
+    return 0LL;
+  __printf_chk(1LL, "Warning: Permanently added '%s' (ECDSA) to the list of known hosts.\n", off_208B80);
+  __printf_chk(1LL, "%s@%s's password: ", off_208B88);
+  if ( !(unsigned int)__isoc99_scanf("%15s", &v5) )
+    return 0LL;
+  v3 = _IO_getc(stdin);
+  LOWORD(v3) = v5;
+  if ( !v5 )
+    return 0LL;
+  v4 = 21527;
+  do                                            // hashing
+  {
+    v3 ^= v4;
+    ++v0;
+    v4 = 2 * v3;
+    LOWORD(v3) = *v0;
+  }
+  while ( (_BYTE)v3 );
+  result = 1LL;
+  if ( (_WORD)v4 != -29190 )
+    return 0LL;
+  return result;
+}
+\end{cpp_code}

@@ -1,0 +1,202 @@
+\chapter{Symbolic Execution}
+
+In this chapter, we will present the main ideas behind {\em symbolic execution}, discussing its limitations and why the current approaches may be not adequate for reverse engineering of real-world software.
+
+\section{Overview}
+
+When a program is executed on a machine the CPU follows a single flow of instructions.
+The control flow path can be different for each concrete execution of the program and only a single path can be explored at a time.
+Hence, it is not possible to evaluate all the possible behaviors of a program when analyzing a single execution.
+
+{\em Symbolic execution} is a program analysis technique able to explore simultaneously different paths in a program, evaluating how different program inputs may affect the execution flow.
+
+While a concrete execution evaluates the program execution based on the concrete values associated with the program inputs, symbolic execution evaluates the program execution using {\em symbolic} values associated with them.
+
+A symbolic value may initially assume any value within the data type domain. When evaluating the program statements, symbolic execution constructs expressions over the symbolic inputs to describe the manipulation performed on the program inputs. When a branch is encountered during the exploration, symbolic execution checks the satisfiability of the branch condition using an SMT \footnote{Satisfability Modulo Theories} solver.
+
+If both branches are feasible, the exploration is forked, adding to each execution path a new constraint that restricts the values allowed for the program inputs in that execution path. The set of constraints collected during the exploration of a path are typically referred to with the term {\em path constraints}. Additionally, the {\em symbolic store} is used to keep track of the mapping between program variables and symbolic or concrete expressions constructed during the exploration
+
+\subsection{Example}
+
+To better explain how symbolic execution works, let us consider the following piece of code:
+
+\begin{cpp_code}
+int foo(int a, int b)
+{
+    int c = 77;
+
+    if(a + b == 42) {
+        c = c - b;
+    }
+    else {
+        c = a - c;
+    }
+    if(c == 38) {
+        puts("Well done.");
+    }
+    else {
+        puts("Try again.");
+    }
+}
+\end{cpp_code}
+
+The goal is to find some valid values for the input variables a and b to reach line 12.
+
+Before starting the evaluation with symbolic execution, two symbolic values, $\delta_{\mathrm{a}}$ and $\delta_{\mathrm{b}}$, are associated with the program inputs a and b, respectively.
+
+In the beginning, we have only a path, with the variable $c$ associated with a concrete value, 77.
+
+When we reach the first if statement two different paths are generated with the following formulas and symbolic storages:
+\begin{itemize}
+\item \verb|[Path #1]| Formula: $\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42$, Storage: $c = 77$
+\item \verb|[Path #2]| Formula: $\neg(\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42)$, Storage: $c = 77$
+\end{itemize}
+
+In the next step for Path 1 the symbolic storage changes to $c = 77 - \delta_{\mathrm{b}}$.
+Similarly, the Path 2 storage changes to $c = \delta_{\mathrm{a}} - 77$.
+
+So Path 1 and 2 reach both the second if statement with different constraints sets.
+We want to reach the branch associated to the condition $c == 38$.
+
+There are four different possible paths:
+\begin{itemize}
+\item \verb|[Path #1.1]| Formula: $\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42 \land c = 38$, Storage: $c = 77 - \delta_{\mathrm{b}}$
+\item \verb|[Path #1.2]| Formula: $\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42 \land c \neq 38$, Storage: $c = 77 - \delta_{\mathrm{b}}$
+\item \verb|[Path #2.1]| Formula: $\neg(\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42) \land c = 38$, Storage: $c = \delta_{\mathrm{a}} - 77$
+\item \verb|[Path #2.2]| Formula: $\neg(\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42) \land c \neq 38$, Storage: $c = \delta_{\mathrm{a}} - 77$
+\end{itemize}
+
+The interesting paths are 1.1 and 2.1 because they reached our target, the \verb|puts("Well done.");| statement. By solving their collected constraints we can get some concrete values for the symbolic inputs that allow the program to reach the target branch during a concrete execution.
+
+The final path constraints for Path 1.1 are $\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42 \land 77 - \delta_{\mathrm{b}} = 38$ and solving it with a SMT solver gives this result: $\delta_{\mathrm{a}} = 3$, $\delta_{\mathrm{b}} = 39$.
+In fact $3 + 39 = 42 \land 77 - 39 = 38$.
+
+Since an assignment for the program input able to reach the target has been found, the symbolic execution can be terminated. If a user may want to get multiple assignments to reach the target, Path 2.1 can be evaluated to obtain another set of concrete values for the program inputs from the SMT solver.
+
+They final path constraints for 2.1 is $\neg(\delta_{\mathrm{a}} + \delta_{\mathrm{b}} = 42) \land \delta_{\mathrm{a}} - 77 = 38$ and it evaluates to:  $\delta_{\mathrm{a}} = 115$, $\delta_{\mathrm{b}} = 40$.
+
+This is an example of what a symbolic executor does.
+
+\section{Dynamic Symbolic Execution}
+
+A main limitation of symbolic execution is exploring paths with very complex constraints.
+The time spent on solving these constraints in order to know if a path can be reached is critical in terms of engine's efficiency.
+
+A game-changing technique to address this problem is {\em Dynamic Symbolic Execution (DSE)}, the combination of symbolic and concrete execution, introduced by \cite{DART}. The idea is to drive symbolic execution along recorded concrete execution paths and so avoid the call to the solver to know if a path is unreachable. This is possible due to binary instrumentation and also permits a simplified implementation of the symbolic interpreter.
+
+%%%aggiungi che DSE può usare alcuni valori concreti per semplificare alcuni constraint (vedi survey se vuoi un esempio)
+
+Dynamic symbolic execution is often implemented with the possibility of selective concretization of some values in order to simplify constraints.
+
+\subsection{Algorithm}
+
+The high-level steps of the DSE process are:
+
+\begin{enumerate}
+\item Choose input variables and set them as symbolic;
+\item Instrument the program to trace all events regarding the input variables;
+\item Choose a random input and execute the program;
+\item Execute the symbolic execution engine on the traced path and collect all constraints;
+\item Negate the last path condition in order to visit a new path. If there is not a path condition left then terminate the exploration;
+\item Invoke the solver to generate a new input. If the condition is unsatisfiable go to step 5;
+\item Execute the program with the generated input and go to step 4;
+\end{enumerate}
+
+\subsection{Limitations}
+\label{dynamic_limit}
+
+Dynamic symbolic execution cannot work with not deterministic programs as the executor cannot analyze which path is executed with an input variation.
+Another issue is when a code cannot be tracked by the engine. A side effect in that code may cause a wrong input generation that leads to execute an unintended path.
+
+\section{Main challenges in symbolic execution}
+
+As described before symbolic execution can, in theory, explore all possible paths in a binary. However, this is not always possible since symbolic execution may not be able in practice to analyze complex programs.
+As described in \cite{SurveySymExec-CSUR18}, several problems make that hard:
+
+\begin{enumerate}
+\item How can a symbolic executor manage the dereferencing of a symbolic pointer?
+\item How to deal with programs with a large number of branches (e.g., loops) that can easily make the number of paths exponential?
+\item How model interactions with the environment?
+\item How to solve non-linear constraints in a reasonable time?
+\end{enumerate}
+
+Some of these challenges may be addressed when using symbolic execution within a specific application context. However, the assumptions made to mitigate these issues may lead symbolic execution to miss some interesting paths or to follow unrealizable program paths.
+
+In the remainder of this section, we discuss some of these problems in more details and present few approaches that have been proposed in the literature to mitigate them.
+
+\subsection{Handling Symbolic Memory}
+
+In the most general symbolic execution approach, a memory address may be symbolic and thus reference in the worst case the whole content of the memory.
+This leads to an ambiguity for the dereferencing operation.
+For example, consider a concrete array \verb|A| and a symbolic index \verb|i|. Since the index is symbolic, the expression \verb|A[i]| may actually refer to any element in memory. Although {\em symbolic} accesses are not rare in real-world programs, how to deal with these kinds of accesses remains an open problem.
+
+There are two fundamental methods to handle this \cite{King}, even if neither is a solution that works at scale:
+
+\begin{itemize}
+\item {\em State Forking}: for each memory operation with symbolic addresses the state is forked considering all possible derived states
+\item {\em If-Then-Else formulas}: this method exploits the capability of some constraint solvers of handling conditional operators in logical formulas, so the pointer is kept in the symbolic storage updating the path's boolean formula with the conditional operator avoiding forking.
+\end{itemize}
+
+However, when a pointer value can be in a very large range most engines do an address concretization, sometimes to NULL or to a newly allocated object.
+
+Since concretization may lead a symbolic executor to miss many interesting paths, one approach proposed in literature \cite{mayem} is the {\em partial} memory model, where write accesses are always concretized, while read accesses are not concretized but treated symbolically when the symbolic address ranges a limited memory area (e.g., up to 1024 bytes).
+
+\subsubsection{A note on loops}
+
+When the number of iterations of a loop depends on the program input this can be a problem for the symbolic executor. In DSE if the engine follows exactly the same path of the recorded concrete execution the number of iterations of a loop is the number of iterations associated to the generated input and not all the possible iterations associated to the symbolic input.
+
+The {\em LESE} \cite{Saxena:EECS-2009-34} technique was developed to bypass this problem. It introduces a symbolic trip-count variable for each loop that represents the number of iterations and mantains a relationship between the symbolic variables and the trip counts. A symbolic value thus has not only a data relationship with the input but also with the loop-dependent effects.
+
+\subsection{Path Explosion}
+
+When the number of forked states is exponential because of the number of branches symbolic execution can become pathologically slow.
+Loops and calls are the main sources of the branch increase. Each loop iteration adds a conditional statement and if the loop depends on some symbolic values the number of branches can be infinite.
+
+A first valid technique to reduce the number of explored states is to remove unsatisfiable paths as soon as possible. However, calling the solver too often can degrade performance, as we will discuss in \ref{constr_solv}.
+
+Another valid technique to reduce forking is state merging. It consists in merging different paths into a single state with a formula that is the disjunction of the merged paths formulas. The disjunction formula makes use of the If-Then-Else conditional expressions.
+
+There several further possible solutions and some are based on the under-approximation of the number of states to explore:
+
+\begin{itemize}
+\item Set a precondition on the input to reduce the number of explored states;
+\item Bound loops to a limited number of iterations
+\item Use path similarity to discard paths that cannot lead to new findings. A popular technique is interpolation, a method to decide if a formula is related to an undesired property and so discard the exploration of the associated path;
+\item Record an execution summary of loop bodies and functions calls so when they are traversed again the symbolic executor can use previous results;
+\end{itemize}
+
+\subsection{Interaction With Environment}
+
+Early implementations of symbolic execution were unable to symbolic reason on the interactions between a program and the operating system. In particular, a common approach was to concretize the arguments of library or system APIs and run concretely the interaction. However, using these approach, only the return value was taken into account, ignoring any side effects possibly performed by the operating system on the process memory. Additionally, concrete evaluation of interaction often resulted in missing interesting execution paths.
+
+To overcome the inaccuracy resulting from concretization during environment interactions, a common approach is to create an abstract model that handles the interaction and provides a simulation of the environment (e.g a symbolic filesystem in order to support operations on files).
+Models are implemented typically at the system call level because writing a model for all possible external functions that a program can use is unpracticable.
+This leads to the symbolic exploration of the library code.
+
+However, some engines combine system calls models with external functions models (typically the standard library API) and only when such models are missing the exploration of library code is performed. 
+
+\subsection{Constraint Solving}
+\label{constr_solv}
+
+The {\em boolean satisfiability problem (SAT)} is an NP-complete problem. {\em Satisfiability modulo theories (SMT)} are used to generalize SAT with arithmetic operations and arrays.
+Symbolic execution engines, as described before, use SMT solvers to evaluate logical constraints.
+
+To make symbolic execution scalable the constraints solving process must be optimized.
+There are some valid approaches:
+
+\begin{itemize}
+\item Reduce the size and complexity of the generated expressions;
+\item Reuse solutions from previous (similar) queries;
+\item Lazy evaluation: on a branch, the symbolic executor takes both paths adding a lazy constraint to the formula. These constraints are evaluated only when the path reaches a target and the path is; discarded if it is unreachable in a concrete execution. This increments the number of paths but also reduces the solution space of the solver thanks to the constraints added after the lazy constraint;
+\item Concretization of not solvable expressions (e.g. complex arithmetics) with random values;
+\end{itemize}
+
+\section{Discussion}
+
+Symbolic execution is a very large matter and we presented only a basic description of the most common issues and solutions. To understand deeply the state of the art the reader can refer to \cite{SurveySymExec-CSUR18}.
+
+In the following chapters we will focus on one application of symbolic execution: help an analyst to understand the behavior of a program.
+A real example is a malware analyst that wants to reconstruct the protocol of a command-and-control malware. The analyst can understand which command activates a specified part of the malware marking the input from the socket as symbolic and executing symbolically the malicious program.
+
+The alternation of concrete execution and symbolic execution with the interaction of the analyst is a novel contribution in the symbolic execution field.
+

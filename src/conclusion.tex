@@ -1,0 +1,29 @@
+\chapter{Conclusion}
+
+Reverse engineering a software is a fundamental task for improving the security of systems. In the last years, its perceived importance is increasing exponentially due to the enormous number of malware discovered every day.
+
+Research on new methods and technologies to improve this process is crucial. Our contribution is a solution that can speed up the debugging of complex software using symbolic execution.
+
+As current limitations, the tools and libraries that we developed are effective but far from to be complete. Windows support is poor and environment interaction must be improved.
+
+State synchronization is already present in literature \cite{muench:bar18} but with a partial approach (state transfer in one direction) and without the focus on user interaction. Our solution, instead, is heavily based on the interaction with the user with the aim to integrate symbolic execution into a debugger using a comfortable interface. We built a tool with a graphical interface to simplify as much as possible the symbolic executor setup by the analyst.
+
+\section{Future work}
+
+%A further work is the integration with a Dynamic Binary Instrumentation tool, {\em Frida}. This tool can instrument Android applications and can be easily scripted in JavaScript. Frida expose classes and methods to handle with the machine code produced with the ART Ahead of Time compiler and that uses the ART runtime. Synchronizing with AngrDBG an instrumented process running in an Android emulator we can do symbolic execution on the x86 machine code associated with the Android application.
+
+A future direction we plan to explore is to develop an AngrDBG frontend for a DBI framework. We considered to use {\em Frida} \cite{Frida} or {\em QBDI} \cite{qbdi}. Frida can easily instrument mobile applications and so perform symbolic execution on them can be useful for a mobile security researcher. QBDI, instead, works well on x86\_64 and it has python bindings so that AngrDBG can run directly in the instrumented process without too much effort in developing the frontend.
+
+The synchronization of the environment and simprocedures on Windows are also features that will be added.
+
+\section{Final Words}
+
+I want to thank all my family, friends and colleagues for the support and Prof. Camil Demetrescu, Dr. Emilio Coppa and Dr. Daniele Cono D'Elia for their patience and for their support in this project.
+
+\vfill
+
+{\em A little green bug has come to get squashed}
+
+Broly to Piccolo
+
+

@@ -1,0 +1,40 @@
+\chapter{Introduction}
+
+Binary analysis is one of the most important problems in computer security.
+Despite the rise of web applications and interpreted languages like Python, the are several reasons that justify this importance, as described in \cite{shoshitaishvili2016state}.
+Nowadays, operating systems are still based on compiled languages and also interpreted languages are often compiled down during execution by a Just In Time compiler. In addition, traditional low-level languages like C are reborn thanks to the rise of Internet Of Things and the associated resource-constrained devices.
+
+A wide family of manual and automatic techniques has been developed over the years to analyze this kind of programs.
+These techniques are divided into static and dynamic analyses depending on the need to execute the program or not.
+
+Despite the continuous innovation on the front of the automatic analysis, the human part remains essential.
+A reverse engineer is a person who tries to understand what a binary program does and how.
+This process usually involves reading and understanding the disassembled code and its effects during execution with the aid of a debugger.
+
+One of the most used automatic techniques nowadays is {\em Symbolic Execution}.
+The idea came about in the '70s \cite{King} but only recently its applications became relevant in computer security.
+Symbolic execution is used for different tasks, varying from deobfuscation to vulnerability detection and automatic exploit generation.
+
+Symbolic execution has been traditionally considered a static analysis technique since in its original embodiment the application code is not executed concretely by the CPU. However, a more recent twist of symbolic execution, known as Dynamic Symbolic Execution (DSE) \cite{DART}, uses a concrete execution to drive the symbolic exploration and thus can be classified as a dynamic analysis technique.
+
+In the last years, symbolic execution becomes also a first-class technique used by anyone who deals with manual reverse engineering.
+
+% explain the connection with reversing here
+
+Execute symbolically an entire complex software (like a web server for example) is a huge task for a machine, even for a supercomputer so the analyst often uses it in a surgical manner on small pieces of code.
+For instance, a reverse engineer often needs to reverse custom encryption functions or obfuscated code during the dynamic analysis.
+
+In this thesis, we introduce the idea of combining symbolic execution with dynamic analysis for reverse engineering.
+
+Differently from DSE, we devise an approach where the reverse engineer can use a debugger to drive and inspect a concrete execution engine of the application code and then, when needed, transfer the execution into a symbolic executor in order to automatically identify the input values required to reach a target point in the code. After that, the user can also transfer back the correct input values found with symbolic execution in order to continue the debugging.
+
+The synchronization between a debugger and a symbolic executor can enhance manual dynamic analysis and allow a reverser to easily solve small portions of code without leaving the debugger.
+
+We implemented a synchronization mechanism on top of the binary analysis framework {\em angr}, allowing for transferring the state of the debugged process to the angr environment and back.
+
+The backend library is debugger agnostic and can be extended to work with various frontends.
+We implemented a frontend for the {\em IDA Pro} debugger and one for the {\em GNU Debugger}, which are both widely popular among reverse engineers.
+
+\subsubsection{Structure of the Thesis}
+
+Chapter 1 describes what is symbolic execution and its limitations. Chapter 2 presents our technique and discuss advantages and limitations. Chapter 3 is about the implementation of the technique in a library based on angr, {\em AngrDBG}, and its frontends, {\em AngrGDB} and {\em IDAngr}. Chapter4 is a usage example of IDAngr to show how the tool works.

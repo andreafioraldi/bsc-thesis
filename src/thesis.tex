@@ -1,0 +1,149 @@
+% !TeX encoding = UTF-8
+% !TeX program = pdflatex
+
+\documentclass[Lau,binding=0.6cm]{sapthesis}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage{listings} % for code
+\usepackage[dvipsnames]{xcolor}   % for \textcolor
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{subfig}
+
+\graphicspath{ {images/} }
+
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\lstnewenvironment{cpp_code}[1][]{
+    \lstset{
+        language=C++,
+        numbers=left,
+        stepnumber=1,
+        breaklines=true,
+        basicstyle=\linespread{1.0}\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{OliveGreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+        columns=fullflexible,
+        postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+        escapeinside={(*@}{@*)},
+        showstringspaces=false
+    }
+    \lstdefinestyle{nonumbers}
+    {numbers=none}
+}{}
+
+    
+\lstnewenvironment{py_code}[1][]{
+    \lstset{
+        language=python,
+        stepnumber=1,
+        breaklines=true,
+        basicstyle=\linespread{1.0}\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{OliveGreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+        columns=fullflexible,
+        otherkeywords={self},
+        postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+        escapeinside={(*@}{@*)},
+        showstringspaces=false,
+    }
+    \lstdefinestyle{nonumbers}
+    {numbers=none}
+}{}
+
+\lstnewenvironment{code}[1][]{
+    \lstset{
+        language=bash,
+        breaklines=true,
+        basicstyle=\linespread{1.0}\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{OliveGreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+        columns=fullflexible,
+        postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+        escapeinside={(*@}{@*)},
+    }
+    \lstdefinestyle{nonumbers}
+    {numbers=none}
+}{}
+
+\lstset{
+    language=python,
+    breaklines=true,
+    basicstyle=\linespread{1.0}\ttfamily,
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+    commentstyle=\color{olivegreen}\ttfamily,
+    morecomment=[l][\color{magenta}]{\#}
+    columns=fullflexible,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    escapeinside={(*@}{@*)},
+}
+
+\renewcommand{\baselinestretch}{1.25} 
+
+\title{Symbolic Execution and \\Debugging Synchronization}
+\author{Andrea Fioraldi}
+\IDnumber{1692419}
+\course{Computer and System Engineering}
+\courseorganizer{Faculty of Information Engineering, Informatics, and Statistics}
+\AcademicYear{2017/2018}
+\copyyear{2018}
+\advisor{Prof. Camil Demetrescu}
+\coadvisor{Dr. Emilio Coppa}
+\coadvisor{Dr. Daniele Cono D'Elia}
+\authoremail{fioraldi.1692419@studenti.uniroma1.it}
+
+\versiondate{\today}
+
+
+\begin{document}
+
+\frontmatter
+
+\maketitle
+
+\clearpage
+
+\vspace*{\stretch{1}}
+\textit{We, hackers, are the dragons of the digital age.}
+
+Order of the Overflow
+\vspace*{\stretch{1}}
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
+\include{intro}
+
+\mainmatter
+
+\include{cap1}
+\include{cap2}
+\include{cap3}
+\include{cap4}
+\include{conclusion}
+
+\newpage
+\phantomsection
+
+\bibliography{thesis} 
+\bibliographystyle{ieeetr}
+
+\end{document}
+
+
